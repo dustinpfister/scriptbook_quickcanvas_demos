@@ -1,4 +1,4 @@
-// Blank Quick Canvas Template
+// Big Foot animation
 
 (function(){
 
@@ -7,18 +7,126 @@
     context = canvas.getContext('2d'),
 	
 	
-	media = [],
+	//media = [],
 	
+	// media module
+	media = (function(){
+		
+		var imgArray = [],
+		loaded = [],
+		done = function(){
+			
+			console.log('images have loaded, but you did not set a callback.');
+			
+		},
+		
+		// call to start the loading of images
+		loadImages = function(imgSrc){
+	    
+		    var i = 0, len = imgSrc.length, img;
+			
+			imgArray = [];
+			loaded = [];
+			
+			while(i < len){
+		    
+		        img = new Image();
+		
+		        (function(index){
+		
+		            loaded[index] = false;
+		
+		            img.addEventListener('load', function(e){
+			 
+		                loaded[index] = true;	
+			
+    		        });
+				
+				}(i));
 	
-
+	    	    img.src = imgSrc[i];
+		
+		        imgArray.push(img);
+	
+	            i++;
+	
+	        }
+			
+        },
+		
+		// check if all images are loaded, and if so call done else keep cheking
+		loadCheck = function(){
+			
+			var i = 0, len = loaded.length, loadCount = 0;
+			
+			while(i < len){
+				
+				if(loaded[i]){
+					
+					loadCount += 1;
+					
+				}
+				
+				i++;
+			}
+			
+			// if all are loaded call done
+			if(loadCount === len){
+				
+				done();
+				
+		    // else keep checking
+			}else{
+				
+				setTimeout(loadCheck, 500);
+				
+			}
+			
+		},
+		
+		// the conrol function is what will be returned to the global variable
+		control = function(alpha, beta, cappa){
+			
+			// a switch!? i think i am going to be sick.
+			switch(typeof alpha){
+				
+				// if alpha is a number
+				case 'number':
+				
+				    return imgArray[alpha];
+				
+				break;
+				
+				// if alpha is a string
+				case 'string':
+				
+					if(alpha === 'load'){
+						
+						console.log('okay i will load ' + beta);
+						loadImages(beta);
+						done = cappa;
+						loadCheck();
+						
+					}
+				
+				break;
+					
+			}
+			
+		};
+	
+		return control; 
+		
+	}()),
+	
     foot = {
 		
 		radian : 0,
+		headRadian : 0,
 		x: 160,
 		y: 120,
 		w: 40,
 		h: 65,
-		
 		
 		frame : 0,
 		maxFrame : 200,
@@ -34,12 +142,11 @@
 				update : function(){
 					
 					foot.radian = 1 - (foot.per * 5 * 2);
-					
+					foot.headRadian = foot.per * 2.5;
 					
 					
 				}
-				
-				
+						
 			},
 			
 			{
@@ -50,8 +157,8 @@
 				update : function(){
 					
 					foot.radian = -1;
-					
-					
+					foot.headRadian = 0.5;
+						
 				}
 				
 			},
@@ -64,7 +171,7 @@
 				update : function(){
 					
 					foot.radian = -1 + ( (foot.per - 0.5) / 0.5 * 2 );
-					
+					foot.headRadian = 0.5 - (foot.per - 0.5);
 					
 				}
 				
@@ -109,8 +216,6 @@
 				}
 				
 				
-				console.log(this.frame);
-				
 				
 			}else{
 				
@@ -134,7 +239,6 @@
 			// update by current state
 			state.update();
 			
-			
 			this.y = 180 - 200 * (this.per - Math.pow(this.per, 2));
 			
 		},
@@ -142,25 +246,71 @@
 		// draw the foot to the given context
 		draw : function(ctx){
 			
-			ctx.drawImage(media[0],0,-this.y);
+			var x,y;
 			
+			// draw background
+			// ALERT! maybe media should be pulled into foot?
+			
+			x = 320 - this.per * 320;
+			y = this.y;
+			
+			//ctx.drawImage(media[0],x,-this.y);
+			//ctx.drawImage(media[0],x,y,320,240,0,0,320,240);
+			ctx.drawImage(media(0),x,y,320,240,0,0,320,240);
+			
+			
+			ctx.strokeStyle = '#ffffff';
+			
+			// draw foot
 			ctx.save();
 			ctx.translate(this.x,this.y);
 			ctx.rotate(this.radian);
-			ctx.strokeStyle = '#ffffff';
-			ctx.strokeRect( -this.w / 2, -this.h / 2, this.w, this.h);
-			ctx.strokeRect( -this.w/4, -this.h/4 + this.h/8, this.w/2, this.h/2);
+			ctx.drawImage( media(2), -75, -this.h / 2, 100, 100);
+			//ctx.strokeRect( -this.w / 2, -this.h / 2, this.w, this.h);
+			
+			//ctx.strokeRect( -this.w/4, -this.h/4 + this.h/8, this.w/2, this.h/2);
+			ctx.restore();
+			
+			// draw head
+			ctx.save();	
+			x = Math.cos(this.radian - 1.57) * 30 + this.x;
+			y = Math.sin(this.radian - 1.57) * 30 + this.y;
+			
+			ctx.translate(x,y);
+			ctx.rotate(this.headRadian);
+			ctx.drawImage(media(1), -40, -40, 80,80);
+			//ctx.strokeRect(-35, -35, 70, 70);
+			
+			
+			//ctx.drawImage(media(1), x-35, y-35, 70,70)
+			//ctx.strokeRect(x-35, y-35, 70, 70);			
 			ctx.restore();
 			
 		}
 		
 	},
 
-
     // start will be called once before running main loop
     start = function(){
 
+	    media(
+		    'load', 
+		    [
+			    'img/bigfoot_back.png',
+				'img/nick2.png',
+				'img/foot.png'
+			], 
+			function(){
+			
+			    //media(0);
+			
+			    loop();
+			
+		    }
+		);
 	
+	    // Alert! maybe my image loaded should be part of foot or another module.
+		/*
 	    var img = new Image();
 		
 		img.addEventListener('load', function(e){
@@ -172,10 +322,7 @@
 		img.src = "img/bigfoot_back.png";
 		
 		media.push(img);
-	
-	
-        
-
+	*/
     },
 
     // what to do on each frame tick
