@@ -239,7 +239,7 @@
 			// update by current state
 			state.update();
 			
-			this.y = 180 - 200 * (this.per - Math.pow(this.per, 2));
+			this.y = 180 - 400 * (this.per - Math.pow(this.per, 2));
 			
 		},
 		
@@ -251,8 +251,12 @@
 			// draw background
 			// ALERT! maybe media should be pulled into foot?
 			
+			//x = 320 - this.per * 320;
+			//y = this.y;
+			
+			//back 3
 			x = 320 - this.per * 320;
-			y = this.y;
+			y = 213 - 420 + this.y;
 			
 			//ctx.drawImage(media[0],x,-this.y);
 			//ctx.drawImage(media[0],x,y,320,240,0,0,320,240);
@@ -296,7 +300,7 @@
 	    media(
 		    'load', 
 		    [
-			    'img/bigfoot_back.png',
+			    'img/bigfoot_back3.png',
 				'img/nick2.png',
 				'img/foot.png'
 			], 
